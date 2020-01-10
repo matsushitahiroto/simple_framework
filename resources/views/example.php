@@ -16,7 +16,7 @@
             <p><?= h($this->string) ?></p>
             <form action="<?= h(SITE_URL . '/example'); ?>" method="post">
                 <?= $csrf; ?>
-                <p><input type="text" name="post-string" value="<?= isset($old['post-string']) ? $old['post-string'] : ''; ?>"></p>
+                <p><input type="text" name="post-string" value="<?= isset($old['post-string']) ? h($old['post-string']) : ''; ?>"></p>
                 <p><input type="submit" value="post"></p>
             </form>
             <form action="<?= h(SITE_URL . '/reset'); ?>" method="post">
