@@ -11,6 +11,9 @@ final class ExampleController extends Controller
     const RULES = [
         'post-string' => ['required', 'is_string']
     ];
+    const MESSAGE = [
+        'post-string' => ['required' => '入力して！', 'is_string' => '文字列だけ']
+    ];
 
     /**
      * 画面表示
@@ -20,10 +23,8 @@ final class ExampleController extends Controller
      */
     public function exampleView(Request $request)
     {
-        $string = $request->session('get', 'string');
-
-        return $this->view('example', [
-            'string' => $string
+        return view('example', [
+            'string' => $request->session()->old('string')
         ]);
     }
 
@@ -36,10 +37,10 @@ final class ExampleController extends Controller
      */
     public function post(Request $request)
     {
-        $this->validation($request->request('all'), self::RULES, [], true);
-        $string = $request->request('get', 'post-string');
-        $request->session('set', 'string', $string);
-        return $this->redirect('/example');
+        $request->setMessage(self::MESSAGE)->validation(self::RULES);
+        return redirect('/example', [
+            'string' => $request->input('post-string')
+        ]);
     }
 
     /**
@@ -49,7 +50,7 @@ final class ExampleController extends Controller
      */
     public function delete()
     {
-        session_destroy();
-        return $this->redirect('/example');
+        session()->flush();
+        return redirect('/example');
     }
 }

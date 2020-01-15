@@ -1,6 +1,8 @@
 <?php
 namespace App\Exception;
 
+use App\Request\MessageBag;
+
 final class ValidationException extends \Exception
 {
     /**
@@ -10,9 +12,9 @@ final class ValidationException extends \Exception
     private $errors;
 
     /**
-     * @param array $errorList
+     * @param MessageBag $errorList
      */
-    public function __construct(array $errorList) {
+    public function __construct(MessageBag $errorList) {
         $this->errors = $errorList;
         parent::__construct(null, 422);
     }
@@ -20,9 +22,9 @@ final class ValidationException extends \Exception
     /**
      * errorを取得
      *
-     * @return array
+     * @return MessageBag
      */
-    public function getErrors(): array {
+    public function getErrors(): MessageBag {
         return $this->errors;
     }
 }

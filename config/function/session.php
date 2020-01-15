@@ -2,20 +2,25 @@
 
 session_start();
 
-$token = null;
+$csrfToken = null;
 
-if(isset($_SESSION['token'])) {
-    $token = $_SESSION['token'];
+if(isset($_SESSION['csrf'])) {
+    $csrfToken = $_SESSION['csrf'];
 }
-$_SESSION['token'] = bin2hex(openssl_random_pseudo_bytes(16));
+
+$_SESSION['flash']['old'] = [];
+$new = isset($_SESSION['flash']['new']) ? $_SESSION['flash']['new'] : [];
+$_SESSION['flash']['old'] = $new;
+$_SESSION['flash']['new'] = [];
+
+$_SESSION['csrf'] = bin2hex(openssl_random_pseudo_bytes(16));
 
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if(!isset($_POST['token']) || $_POST['token'] !== $token) {
-        $error = '不正な処理が行われました';
-        include(ERROR_PATH . '401.php');
+    if(!isset($_POST['csrf']) || $_POST['csrf'] !== $csrfToken) {
+        echo '不正な処理が行われました';
         exit;
     }
-    unset($_REQUEST['token']);
-    unset($_POST['token']);
-    $_SESSION['old']['post'] = $_POST;
+    $post = $_POST;
+    unset($post['csrf']);
+    $_SESSION['flash']['new']['oldInput'] = $post;
 }

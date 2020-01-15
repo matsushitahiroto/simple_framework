@@ -24,7 +24,7 @@ try {
     $app->$targetMethod($request);
     exit;
 } catch (App\Exception\ValidationException $e) {
-    $request->session('set', 'errors', $e->getErrors());
+    session()->setErrors($e->getErrors());
     header('Location: ' . $_SERVER['HTTP_REFERER']);
     exit;
 } catch (App\Exception\MethodNotAllowedException $e) {

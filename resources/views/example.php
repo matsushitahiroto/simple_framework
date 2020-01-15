@@ -8,15 +8,13 @@
     <body>
         <div class="content">
             <h1>Example Tool</h1>
-            <?php foreach ($errors as $key => $error) {?>
-                <?php foreach ($error as $value) {?>
-                    <p><?= h($value) ?></p>
-                <?php } ?>
+            <?php foreach ($errors->all() as $error) {?>
+                <p><?= h($error) ?></p>
             <?php } ?>
-            <p><?= h($this->string) ?></p>
+            <p><?= h($string) ?></p>
             <form action="<?= h(SITE_URL . '/example'); ?>" method="post">
                 <?= $csrf; ?>
-                <p><input type="text" name="post-string" value="<?= isset($old['post-string']) ? h($old['post-string']) : ''; ?>"></p>
+                <p><input type="text" name="post-string" value="<?= h(old('post-string')); ?>"></p>
                 <p><input type="submit" value="post"></p>
             </form>
             <form action="<?= h(SITE_URL . '/reset'); ?>" method="post">
