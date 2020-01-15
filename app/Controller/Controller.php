@@ -6,10 +6,9 @@ use App\Exception\MethodNotAllowedException;
 
 class Controller
 {
-    public function __call($method,$args){
-        throw new MethodNotAllowedException();
-    }
-
+    /**
+     * welcome画面表示
+     */
     public function welcomeView()
     {
         return view('welcome');

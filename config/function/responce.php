@@ -4,6 +4,7 @@
  * 指定されたパスへリダイレクト
  *
  * @param string $path
+ * @param array $params
  * @return void
  */
 function redirect(string $path, array $params = []) {
@@ -25,7 +26,7 @@ function view(string $fileName, array $params = []) {
         $$key = $value;
     }
     $errors = session()->errors();
-    session()->forget(['oldInput', 'errors']);
+    session()->forget(['errors']);
     $csrf = '<input type="hidden" name="csrf" value="' . session()->get('csrf') . '">';
     include(VIEWS_PATH . $fileName . '.php');
 }
