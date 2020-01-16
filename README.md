@@ -26,6 +26,14 @@
 
     <p><?= h($string) ?></p>
 
+### リクエスト　セッション　バリデーション　の主要機能
+
+  引数で配列の階層を指定する場合はドットつなぎ
+  第二引数でデフォルト値指定可能
+
+    $inputtext = session()->get('flash.old.inputtext', 'default');
+
+
 ### リクエストクラス  
 
 #### 全入力データの取得  
@@ -76,21 +84,22 @@
   処理の結果を欲しい場合
 
     $validatedData = $request->validate([
-        'body' => ['required','is_string']
+        'body' => 'required|is_string'
     ], false);
 
   エラーがあった場合にリダイレクトしてほしい場合
 
     $request->validate([
-        'body' => ['required','is_string']
+        'body' => 'required|is_string'
     ]);
 
-  エラーメッセージをセットしたい場合
+  独自エラーメッセージをセットしたい場合
 
     $request->setMessage([
-      'body' => ['required'=>'必須です','is_string'=>'文字列だけ']
+      'body.required' => '必須です',
+      'body.is_string' => '文字列だけ'
     ])->validate([
-      'body' => ['required','is_string']
+      'body' => 'required|is_string'
     ]);
 
 #### 画面表示
