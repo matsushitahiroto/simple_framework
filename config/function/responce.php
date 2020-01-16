@@ -26,7 +26,7 @@ function view(string $fileName, array $params = []) {
         $$key = $value;
     }
     $errors = session()->errors();
-    session()->forget(['errors']);
+    session()->forget('errors');
     $csrf = '<input type="hidden" name="csrf" value="' . session()->get('csrf') . '">';
     include(VIEWS_PATH . $fileName . '.php');
 }

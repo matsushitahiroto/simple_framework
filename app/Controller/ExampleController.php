@@ -9,10 +9,11 @@ final class ExampleController extends Controller
      * validation用
      */
     const RULES = [
-        'post-string' => ['required', 'is_string']
+        'post-string' => 'required|is_string'
     ];
     const MESSAGE = [
-        'post-string' => ['required' => '入力して！', 'is_string' => '文字列だけ']
+        'post-string.required' => '入力して！',
+        'post-string.is_string' => '文字列だけ'
     ];
 
     /**

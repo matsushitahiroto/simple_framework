@@ -13,8 +13,16 @@ class Session
      * @param string $value
      * @return $this
      */
-    public function set($name, $value) {
-        $_SESSION[$name] = $value;
+    public function set(string $name, string $value) {
+        $oldKey = null;
+        $session = [];
+        foreach (array_reverse(explode('.', $name)) as $key) {
+            $session[$key] = $value;
+            if ($oldKey) unset($session[$oldKey]);
+            $oldKey = $key;
+            $value = $session;
+        }
+        $_SESSION = array_merge_recursive($_SESSION, $session);
         return $this;
     }
 
@@ -22,10 +30,19 @@ class Session
      * 制定したセッションを取得
      *
      * @param string $name
-     * @return $this
+     * @param string $default
+     * @return string|array $target
      */
-    public function get($name) {
-         return isset($_SESSION[$name]) ? $_SESSION[$name] : '';
+    public function get(string $name, string $default = '') {
+        $target = $_SESSION;
+        foreach (explode('.', $name) as $key) {
+            if (isset($target[$key])) {
+                $target = $target[$key];
+            } else {
+                return $default;
+            }
+        }
+        return $target;
     }
 
     /**
@@ -44,7 +61,7 @@ class Session
      * @return string
      */
     public function oldInput($name): string {
-         return isset($_SESSION['flash']['old']['oldInput'][$name]) ? $_SESSION['flash']['old']['oldInput'][$name] : '';
+        return $this->get('flash.old.oldInput.' . $name);
     }
 
     /**
@@ -63,7 +80,7 @@ class Session
      * @param MessageBag $args
      */
     public function setErrors(MessageBag $value) {
-        $_SESSION['errors'] = serialize($value);
+        $this->set('errors', serialize($value));
     }
 
     /**
@@ -74,13 +91,28 @@ class Session
      * @return void
      */
     public function forget($args) {
+        function array_del($array, $i, $hierarchy, $max) {
+            $tmp = [];
+            foreach($array as $key => $item) {
+                if (is_array($item) && $key === $hierarchy[$i] && $max !== ($i + 1)) {
+                    $tmp[$key] = array_del($item, $i + 1, $hierarchy, $max);
+                } elseif (!empty($item) && $key === $hierarchy[$i] && $max === ($i + 1)) {
+                    unset($tmp[$key]);
+                } else {
+                    $tmp[$key] = $item;
+                }
+            }
+            return $tmp;
+        }
         switch (gettype($args)) {
             case 'string':
-                if (isset($_SESSION[$args])) unset($_SESSION[$args]);
+                $hierarchy = explode('.', $args);
+                $_SESSION = array_del($_SESSION, 0, $hierarchy, count($hierarchy));
                 break;
             case 'array':
                 foreach ($args as $value) {
-                    if (isset($_SESSION[$value])) unset($_SESSION[$value]);
+                    $hierarchy = explode('.', $value);
+                    $_SESSION = array_del($_SESSION, 0, $hierarchy, count($hierarchy));
                 }
                 break;
             default:
@@ -105,8 +137,8 @@ class Session
      * @param string $value
      * @return $this
      */
-    public function flash($name, $value) {
-        $_SESSION['flash']['new'][$name] = $value;
+    public function flash(string $name, string $value) {
+        $this->set('flash.new.' . $name, $value);
         return $this;
     }
 
@@ -114,10 +146,11 @@ class Session
      * フラッシュセッションを取得
      *
      * @param string $name
-     * @return string
+     * @param string $default
+     * @return string|array
      */
-    public function old($name): string {
-        return isset($_SESSION['flash']['old'][$name]) ? $_SESSION['flash']['old'][$name] : '';
+    public function old(string $name, string $default = '') {
+        return $this->get('flash.old.' . $name, $default);
     }
 
     /**
@@ -128,7 +161,7 @@ class Session
      */
     public function keep(array $args) {
         foreach ($args as $name) {
-            $value = isset($_SESSION['flash']['old'][$name]) ? $_SESSION['flash']['old'][$name] : '';
+            $value = $this->old($name);
             $this->flash($name, $value);
         }
     }

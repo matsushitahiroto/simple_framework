@@ -34,11 +34,20 @@ class Request
     /**
      * 指定したkeyで取得
      *
-     * @param $name
-     * @return mixed
+     * @param string $name
+     * @param string $default
+     * @return string|array $target
      */
-    public function get($name) {
-         return isset($this->request[$name]) ? $this->request[$name] : '';
+    public function get(string $name, string $default = '') {
+        $target = $this->request;
+        foreach (explode('.', $name) as $key) {
+            if (isset($target[$key])) {
+                $target = $target[$key];
+            } else {
+                return $default;
+            }
+        }
+        return $target;
     }
 
     /**
@@ -58,11 +67,11 @@ class Request
     public function input($args = null) {
         switch (gettype($args)) {
             case 'string':
-                 return isset($this->input[$args]) ? $this->input[$args] : '';
+                 return $this->get($args);
             case 'array':
                 $input = [];
                 foreach ($args as $value) {
-                     $input[$value] = isset($this->input[$value]) ? $this->input[$value] : '';
+                     $input[$value] = $this->get($value);
                 }
                 return $input;
             case 'NULL':
@@ -100,10 +109,12 @@ class Request
     /**
      * フラッシュセッションを取得
      *
-     * @return mixed
+     * @param string $name
+     * @param string $default
+     * @return string|array
      */
-    public function old($name) {
-         return $this->session()->old($name);
+    public function old(string $name, string $default = '') {
+         return $this->session()->old($name, $default);
     }
 
     /**
@@ -130,17 +141,18 @@ class Request
         $errors = new MessageBag();
         $message = $this->message;
         foreach ($rules as $key => $rule) {
+            $rule = explode('|', $rule);
             foreach ($rule as $value) {
                 switch ($value) {
                     case 'required':
                         if ($this->input($key) === '') {
-                            $error = isset($message[$key]['required']) ? $message[$key]['required'] : '必須項目が入力されていません！';
+                            $error = isset($message[$key . '.required']) ? $message[$key . '.required'] : '必須項目が入力されていません！';
                             $errors->set($key, $error);
                         }
                         break;
                     default:
                         if (!$value($this->input($key))) {
-                            $error = isset($message[$key][$value]) ? $message[$key][$value] : '不正な値';
+                            $error = isset($message[$key . '.' . $value]) ? $message[$key . '.' . $value] : '不正な値';
                             $errors->set($key, $error);
                         }
                         break;
